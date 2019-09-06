@@ -1,6 +1,7 @@
 <?php
 
 use Behat\Behat\Context\Context;
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\MinkContext;
@@ -10,6 +11,8 @@ use Behat\MinkExtension\Context\MinkContext;
  */
 class FeatureContext extends MinkContext implements Context
 {
+    private $output;
+
     /**
      * Initializes context.
      *
@@ -19,5 +22,31 @@ class FeatureContext extends MinkContext implements Context
      */
     public function __construct()
     {
+    }
+
+    /**
+     * @Given there is a file named :filename
+     */
+    public function thereIsAFileNamed($filename)
+    {
+        touch($filename);
+    }
+
+    /**
+     * @When I run :command
+     */
+    public function iRun($command)
+    {
+        $this->output = shell_exec($command);
+    }
+
+    /**
+     * @Then I should see :string in the output
+     */
+    public function iShouldSeeInTheOutput($string)
+    {
+        if (strpos($this->output, $string) === false) {
+            throw new \Exception(sprintf('Did not see "%s" in the output "%s"', $string, $this->output));
+        }
     }
 }
