@@ -6,6 +6,8 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\MinkContext;
 
+require_once __DIR__. '/../../vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
+
 /**
  * Defines application features from the specific context.
  */
@@ -22,6 +24,28 @@ class FeatureContext extends MinkContext implements Context
      */
     public function __construct()
     {
+    }
+
+    /**
+     * @BeforeScenario
+     */
+    public function moveIntoTestDir()
+    {
+        if (!is_dir('test')) {
+            mkdir('test');
+        }
+        chdir('test');
+    }
+
+    /**
+     * @AfterScenario
+     */
+    public function moveOutOfTestDir()
+    {
+        chdir('..');
+        if (is_dir('test')) {
+            system('rm -r ' . realpath('test'));
+        }
     }
 
     /**
@@ -45,8 +69,19 @@ class FeatureContext extends MinkContext implements Context
      */
     public function iShouldSeeInTheOutput($string)
     {
-        if (strpos($this->output, $string) === false) {
-            throw new \Exception(sprintf('Did not see "%s" in the output "%s"', $string, $this->output));
-        }
+        assertContains(
+            $string,
+            $this->output,
+            sprintf('Did not see "%s" in the output "%s"', $string, $this->output)
+        );
     }
+
+    /**
+     * @Given there is a dir named :dir
+     */
+    public function thereIsADirNamed($dir)
+    {
+        mkdir($dir);
+    }
+
 }
