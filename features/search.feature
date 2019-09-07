@@ -3,8 +3,14 @@ Feature: Search
   As a web user
   I need to be able to search for products
 
-  Scenario: Search for a word that exists
+  Background:
     Given I am on "/"
-    When I fill in "searchTerm" with "Samsung"
+
+  Scenario Outline:
+    When I fill in "searchTerm" with "<term>"
     And I press "search_submit"
-    Then I should see "Samsung Galaxy S II"
+    Then I should see "<result>"
+    Examples:
+      | term    | result            |
+      | Samsung | Samsung Galaxy    |
+      | XBox    | No products found |
