@@ -4,14 +4,14 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Behat\MinkExtension\Context\MinkContext;
+use Behat\MinkExtension\Context\RawMinkContext;
 
 require_once __DIR__. '/../../vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
 
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context
+class FeatureContext extends RawMinkContext implements Context
 {
     private $output;
 
@@ -82,6 +82,40 @@ class FeatureContext implements Context
     public function thereIsADirNamed($dir)
     {
         mkdir($dir);
+    }
+
+    /**
+     * @When I fill in the search box with :term
+     */
+    public function iFillInTheSearchBoxWith($term)
+    {
+        // name="searchTerm"
+        $searchBox = $this->getPage()
+            ->find('css', '[name="searchTerm"]');
+        assertNotNull($searchBox, 'The search box was not found');
+
+        $searchBox->setValue($term);
+    }
+
+    /**
+     * @When I press the search button
+     */
+    public function iPressTheSearchButton()
+    {
+        $button = $this->getPage()
+            ->find('css', '#search_submit');
+
+        assertNotNull($button, 'The search button could not be found');
+
+        $button->press();
+    }
+
+    /**
+     * @return \Behat\Mink\Element\DocumentElement
+     */
+    private function getPage()
+    {
+        return $this->getSession()->getPage();
     }
 
 }
