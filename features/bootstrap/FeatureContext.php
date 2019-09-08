@@ -1,5 +1,6 @@
 <?php
 
+use AppBundle\Entity\Product;
 use AppBundle\Entity\User;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
@@ -71,6 +72,62 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Given there are :count products
+     */
+    public function thereAreProducts($count)
+    {
+        $em = $this->getEntityManager();
+        for ($i = 0; $i < $count; $i++) {
+            $product = new Product();
+            $product->setName('Product' . $i);
+            $product->setPrice(rand(10, 1000));
+            $product->setDescription('lorem');
+
+            $em->persist($product);
+        }
+        $em->flush();
+    }
+
+    /**
+     * @Given I an on :arg1
+     */
+    public function iAnOn($arg1)
+    {
+        throw new PendingException();
+    }
+
+    /**
+     * @When I click :linkText
+     */
+    public function iClick($linkText)
+    {
+        $this->getPage()->clickLink($linkText);
+    }
+
+    /**
+     * @Then I should see :count products
+     */
+    public function iShouldSeeProducts($count)
+    {
+        $table = $this->getPage()->find('css', 'table.table');
+        assertNotNull($table, 'Could not find a table');
+
+        assertCount(intval($count), $table->findAll('css', 'tbody tr'));
+    }
+
+    /**
+     * @Given I am logged in as an admin
+     */
+    public function iAmLoggedInAsAnAdmin()
+    {
+        $this->thereIsAnAdminUserWithPassword('admin', 'admin');
+        $this->visitPath('/login');
+        $this->getPage()->fillField('Username', 'admin');
+        $this->getPage()->fillField('Password', 'admin');
+        $this->getPage()->pressButton('Login');
+    }
+
+    /**
      * @BeforeScenario
      */
     public function clearData()
@@ -78,6 +135,14 @@ class FeatureContext extends RawMinkContext implements Context
         $em = $this->getContainer()->get('doctrine')->getManager();
         $purger = new ORMPurger($em);
         $purger->purge();
+    }
+
+    /**
+     * @return \Doctrine\ORM\EntityManager|object
+     */
+    private function getEntityManager()
+    {
+        return $this->getContainer()->get('doctrine.orm.entity_manager');
     }
 
     /**
