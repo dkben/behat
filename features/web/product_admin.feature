@@ -3,24 +3,32 @@ Feature: Product Admin Area
   As an admin user
   I need to be able to add/edit/delete products
 
-  Scenario: List available products
+  Background:
     Given I am logged in as an admin
-    And there are 5 products
+
+  Scenario: List available products
+    Given there are 5 products
+    And there is 1 product
     And I am on "/admin"
     When I click "Products"
-    Then I should see 5 products
+    Then I should see 6 products
 
   Scenario: Products show owner
-    Given I am logged in as an admin
-    And I author 5 products
+    Given I author 5 products
     When I go to "/admin/products"
-    # no products will be anonymous
     Then I should not see "Anonymous"
+
+  Scenario: Show published/unpublished
+    Given the following products exist:
+      | name | is published |
+      | Foo1 | yes          |
+      | Foo2 | no           |
+    When I go to "/admin/products"
+    # todo
 
   @javascript
   Scenario: Add a new product
-    Given I am logged in as an admin
-    And I am on "/admin/products"
+    Given I am on "/admin/products"
     When I click "New Product"
     And I wait for the modal to load
     And I fill in "Name" with "Veloci-chew toy"
@@ -30,5 +38,3 @@ Feature: Product Admin Area
     Then I should see "Product created FTW!"
     And I should see "Veloci-chew toy"
     And I should not see "Anonymous"
-
-    

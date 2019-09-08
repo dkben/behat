@@ -77,7 +77,7 @@ class FeatureContext extends RawMinkContext implements Context
     }
 
     /**
-     * @Given there are :count products
+     * @Given there is/are :count product(s)
      */
     public function thereAreProducts($count)
     {
@@ -90,6 +90,28 @@ class FeatureContext extends RawMinkContext implements Context
     public function iAuthorProducts($count)
     {
         $this->createProducts($count, $this->currentUser);
+    }
+
+    /**
+     * @Given the following products exist:
+     */
+    public function theFollowingProductsExist(TableNode $table)
+    {
+        $em = $this->getEntityManager();
+
+        foreach ($table as $row) {
+            $product = new Product();
+            $product->setName($row['name']);
+            $product->setPrice(rand(10, 1000));
+            $product->setDescription('lorem');
+
+            if ($row['is published'] == 'yes') {
+                $product->setIsPublished(true);
+            }
+
+            $em->persist($product);
+        }
+        $em->flush();
     }
 
     /**
