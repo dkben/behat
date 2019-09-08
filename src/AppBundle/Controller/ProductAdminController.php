@@ -29,6 +29,8 @@ class ProductAdminController extends Controller
      */
     public function newAction(Request $request)
     {
+        sleep(1);
+
         if ($request->isMethod('POST')) {
             $product = new Product();
             $product->setName($request->get('name'));

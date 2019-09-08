@@ -17,10 +17,12 @@ Feature: Product Admin Area
     # no products will be anonymous
     Then I should not see "Anonymous"
 
+  @javascript
   Scenario: Add a new product
     Given I am logged in as an admin
     And I am on "/admin/products"
     When I click "New Product"
+    And I wait for the modal to load
     And I fill in "Name" with "Veloci-chew toy"
     And I fill in "Price" with "20"
     And I fill in "Description" with "Have your raptor chew on this instead!"
