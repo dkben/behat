@@ -18,6 +18,9 @@ require_once __DIR__. '/../../vendor/phpunit/phpunit/src/Framework/Assert/Functi
 class FeatureContext extends RawMinkContext implements Context
 {
     use KernelDictionary;
+
+    private $currentUser;
+
     /**
      * Initializes context.
      *
@@ -69,6 +72,8 @@ class FeatureContext extends RawMinkContext implements Context
             ->getManager();
         $em->persist($user);
         $em->flush();
+
+        return $user;
     }
 
     /**
@@ -76,16 +81,15 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function thereAreProducts($count)
     {
-        $em = $this->getEntityManager();
-        for ($i = 0; $i < $count; $i++) {
-            $product = new Product();
-            $product->setName('Product' . $i);
-            $product->setPrice(rand(10, 1000));
-            $product->setDescription('lorem');
+        $this->createProducts($count);
+    }
 
-            $em->persist($product);
-        }
-        $em->flush();
+    /**
+     * @Given I author :count products
+     */
+    public function iAuthorProducts($count)
+    {
+        $this->createProducts($count, $this->currentUser);
     }
 
     /**
@@ -120,7 +124,8 @@ class FeatureContext extends RawMinkContext implements Context
      */
     public function iAmLoggedInAsAnAdmin()
     {
-        $this->thereIsAnAdminUserWithPassword('admin', 'admin');
+        $this->currentUser = $this->thereIsAnAdminUserWithPassword('admin', 'admin');
+
         $this->visitPath('/login');
         $this->getPage()->fillField('Username', 'admin');
         $this->getPage()->fillField('Password', 'admin');
@@ -151,6 +156,24 @@ class FeatureContext extends RawMinkContext implements Context
     private function getPage()
     {
         return $this->getSession()->getPage();
+    }
+
+    private function createProducts($count, User $author = null)
+    {
+        $em = $this->getEntityManager();
+        for ($i = 0; $i < $count; $i++) {
+            $product = new Product();
+            $product->setName('Product' . $i);
+            $product->setPrice(rand(10, 1000));
+            $product->setDescription('lorem');
+
+            if ($author) {
+                $product->setAuthor($author);
+            }
+
+            $em->persist($product);
+        }
+        $em->flush();
     }
 
 }
