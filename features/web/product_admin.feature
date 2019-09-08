@@ -24,7 +24,7 @@ Feature: Product Admin Area
       | Foo1 | yes          |
       | Foo2 | no           |
     When I go to "/admin/products"
-    # todo
+    Then the "Foo1" row should have a check mark
 
   @javascript
   Scenario: Add a new product
